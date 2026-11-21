@@ -92,15 +92,15 @@ lemma Monochromatic.colorVertex_persist {C : PCol α} {A : Finset α} {v : α} {
     (hv : C v = none) (h : ¬ Monochromatic C A) :
     ¬ Monochromatic (colorVertex C v b) A := by
   unfold Monochromatic at h ⊢
-  push_neg at h
+  push Not at h
   obtain ⟨x, hx, y, hy, hxc, hyc, hne⟩ := h
   intro hmono'
   have hxv : x ≠ v := by
     intro hcon; subst hcon; exact hxc hv
   have hyv : y ≠ v := by
     intro hcon; subst hcon; exact hyc hv
-  have hx' : colorVertex C v b x = C x := by simp only [colorVertex, if_neg hxv]
-  have hy' : colorVertex C v b y = C y := by simp only [colorVertex, if_neg hyv]
+  have hx' : colorVertex C v b x = C x := by simp only [colorVertex, ite_eq_right hxv]
+  have hy' : colorVertex C v b y = C y := by simp only [colorVertex, ite_eq_right hyv]
   have h1 : colorVertex C v b x ≠ none := by rw [hx']; exact hxc
   have h2 : colorVertex C v b y ≠ none := by rw [hy']; exact hyc
   have hc' := hmono' x hx y hy h1 h2
@@ -111,7 +111,7 @@ lemma Monochromatic.colorVertex_persist {C : PCol α} {A : Finset α} {v : α} {
 one colored vertex, then after coloring the uncolored vertex `v`, the edge stays
 monochromatic iff the new color equals `d`. -/
 lemma Monochromatic.colorVertex_iff {C : PCol α} {A : Finset α} {v : α} {b : Bool}
-    (hv : C v = none) (hAv : v ∈ A) (hmono : Monochromatic C A)
+    (hv : C v = none) (hAv : v ∈ A) (_hmono : Monochromatic C A)
     (hcol : ∃ x ∈ A, C x ≠ none) (d : Bool) (hd : ∀ x ∈ A, C x ≠ none → C x = some d) :
     Monochromatic (colorVertex C v b) A ↔ b = d := by
   constructor
@@ -132,14 +132,14 @@ lemma Monochromatic.colorVertex_iff {C : PCol α} {A : Finset α} {v : α} {b : 
       by_contra hnone
       exact hne ((colorVertex_eq_none_iff C v b z).mpr ⟨hnone, hzv⟩)
     by_cases hxv : x = v
-    · simp only [colorVertex, if_pos hxv]
+    · simp only [colorVertex, ite_eq_left hxv]
       by_cases hyv : y = v
-      · simp only [colorVertex, if_pos hyv]
-      · simp only [colorVertex, if_neg hyv, get y hy hyc hyv, ← hb]
-    · simp only [colorVertex, if_neg hxv, get x hx hxc hxv]
+      · simp only [ite_eq_left hyv]
+      · simp only [ite_eq_right hyv, get y hy hyc hyv, ← hb]
+    · simp only [colorVertex, ite_eq_right hxv, get x hx hxc hxv]
       by_cases hyv : y = v
-      · simp only [colorVertex, if_pos hyv, ← hb]
-      · simp only [colorVertex, if_neg hyv, get y hy hyc hyv]
+      · simp only [ite_eq_left hyv, ← hb]
+      · simp only [ite_eq_right hyv, get y hy hyc hyv]
 
 /-- If all vertices of `A` are uncolored, coloring any one of them keeps `A`
 monochromatic (it then has a single colored vertex). -/
@@ -151,12 +151,12 @@ lemma Monochromatic.colorVertex_of_all_uncolored {C : PCol α} {A : Finset α} {
   have hxv : x = v := by
     by_contra hne
     exfalso
-    simp only [colorVertex, if_neg hne, hnone x hx] at hxc
+    simp only [colorVertex, ite_eq_right hne, hnone x hx] at hxc
     exact hxc rfl
   have hyv : y = v := by
     by_contra hne
     exfalso
-    simp only [colorVertex, if_neg hne, hnone y hy] at hyc
+    simp only [colorVertex, ite_eq_right hne, hnone y hy] at hyc
     exact hyc rfl
   subst hxv
   subst hyv
@@ -186,16 +186,16 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
         have hxv : x ≠ v := by
           intro hcon; subst hcon; exact hxc hv
         have hexists' : ∃ z ∈ A, colorVertex C v b z ≠ none :=
-          ⟨x, hx, by simp only [colorVertex, if_neg hxv]; exact hxc⟩
+          ⟨x, hx, by simp only [colorVertex, ite_eq_right hxv]; exact hxc⟩
         unfold edgeWeight
-        rw [if_pos hexists']
+        rw [ite_eq_left hexists']
         by_cases hb : b = d
-        · rw [if_pos hb, if_pos ((hmb b).mpr hb), uncoloredCount_colorVertex hv hAv b]
+        · rw [ite_eq_left hb, ite_eq_left ((hmb b).mpr hb), uncoloredCount_colorVertex hv hAv b]
           have e : ((uncoloredCount C A - 1 : ℕ) : ℤ) + 1 = (uncoloredCount C A : ℤ) := by
             have : (0 : ℤ) < (uncoloredCount C A : ℤ) := by exact_mod_cast fpos
             omega
           rw [e]
-        · rw [if_neg hb, if_neg (fun hc => hb ((hmb b).mp hc))]
+        · rw [ite_eq_right hb, ite_eq_right (fun hc => hb ((hmb b).mp hc))]
       have finish : (2:ℝ)^(-(uncoloredCount C A : ℤ)) / 2
           ≤ (2:ℝ)^(-((uncoloredCount C A : ℤ) + 1)) := by
         have e : (-((uncoloredCount C A : ℤ) + 1) + 1 : ℤ) = -(uncoloredCount C A : ℤ) := by ring
@@ -214,7 +214,7 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
             = (2:ℝ)^(-(uncoloredCount C A : ℤ)) := by rw [key]; simp
         simp only [h1, h2, zero_add]
         unfold edgeWeight
-        rw [if_pos hcol, if_pos hmono]
+        rw [ite_eq_left hcol, ite_eq_left hmono]
         exact finish
       | true =>
         have h1 : edgeWeight (colorVertex C v false) A = 0 := by rw [key]; simp
@@ -222,7 +222,7 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
             = (2:ℝ)^(-(uncoloredCount C A : ℤ)) := by rw [key]; simp
         simp only [h1, h2, add_zero]
         unfold edgeWeight
-        rw [if_pos hcol, if_pos hmono]
+        rw [ite_eq_left hcol, ite_eq_left hmono]
         exact finish
     · -- Case 2: colored but not monochromatic — weight stays 0
       have hw : ∀ b : Bool, edgeWeight (colorVertex C v b) A = 0 := by
@@ -231,14 +231,14 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
         have hxv : x ≠ v := by
           intro hcon; subst hcon; exact hxc hv
         have hexists' : ∃ z ∈ A, colorVertex C v b z ≠ none :=
-          ⟨x, hx, by simp only [colorVertex, if_neg hxv]; exact hxc⟩
+          ⟨x, hx, by simp only [colorVertex, ite_eq_right hxv]; exact hxc⟩
         unfold edgeWeight
-        rw [if_pos hexists']
-        exact if_neg (Monochromatic.colorVertex_persist hv hmono)
+        rw [ite_eq_left hexists']
+        exact ite_eq_right (Monochromatic.colorVertex_persist hv hmono)
       rw [sum_bool_eq]
       simp only [hw]
       unfold edgeWeight
-      rw [if_pos hcol, if_neg hmono]
+      rw [ite_eq_left hcol, ite_eq_right hmono]
       norm_num
   · -- Case 3: completely uncolored — expectation equals 2^(-|A|)
     have hnone : ∀ x ∈ A, C x = none := by
@@ -251,9 +251,9 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
     have hw : ∀ b : Bool, edgeWeight (colorVertex C v b) A = (2:ℝ)^(-(A.card:ℤ)) := by
       intro b
       unfold edgeWeight
-      rw [if_pos (⟨v, hAv, by simp only [colorVertex, if_pos rfl]; simp⟩ :
+      rw [ite_eq_left (⟨v, hAv, by simp [colorVertex]⟩ :
         ∃ z ∈ A, colorVertex C v b z ≠ none)]
-      rw [if_pos (Monochromatic.colorVertex_of_all_uncolored
+      rw [ite_eq_left (Monochromatic.colorVertex_of_all_uncolored
         (C := C) (A := A) (v := v) (b := b) hnone)]
       rw [uncoloredCount_colorVertex hv hAv b]
       have e : ((uncoloredCount C A - 1 : ℕ) : ℤ) + 1 = (A.card : ℤ) := by
@@ -267,7 +267,7 @@ lemma edgeWeight_colorVertex_le (C : PCol α) (A : Finset α) (v : α)
       linarith
     have hRHS : edgeWeight C A = (2:ℝ)^(-(A.card:ℤ)) := by
       unfold edgeWeight
-      rw [if_neg hcol]
+      rw [ite_eq_right hcol]
     rw [sum_bool_eq, hw true, hw false, hRHS]
     field_simp
     linarith
