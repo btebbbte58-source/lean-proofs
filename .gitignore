@@ -1,0 +1,3 @@
+.lake/
+cache_log.txt
+*.olean
