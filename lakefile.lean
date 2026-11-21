@@ -10,5 +10,5 @@ require mathlib from
   git "https://github.com/leanprover-community/mathlib4.git" @ "master"
 
 @[default_target]
-lean_lib «LeanProofs» where
-  -- one module per problem, e.g. LeanProofs.JSP000748
+lean_lib «ErdosProblems» where
+  -- one directory per problem, e.g. ErdosProblems.Erdos1027.Statement
