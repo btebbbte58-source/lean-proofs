@@ -1,3 +1,4 @@
 .lake/
 cache_log.txt
 *.olean
+cache_log*.txt
