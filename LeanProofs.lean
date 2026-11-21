@@ -1,1 +1,1 @@
-import LeanProofs
+import LeanProofs.JSP000854

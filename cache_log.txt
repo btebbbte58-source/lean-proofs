@@ -1,0 +1,3 @@
+info: mathlib: remote URL changed
+  old: file:///D:/孙割的项目/mathlib4
+  new: https://github.com/leanprover-community/mathlib4.git
