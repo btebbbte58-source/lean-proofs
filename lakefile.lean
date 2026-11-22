@@ -12,3 +12,4 @@ require mathlib from
 @[default_target]
 lean_lib «ErdosProblems» where
   -- one directory per problem, e.g. ErdosProblems.Erdos1027.Statement
+  globs := #[.submodules `ErdosProblems]
